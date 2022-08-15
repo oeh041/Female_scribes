@@ -50,6 +50,11 @@ tot$to <- tot$from <- tot$year
 
 ## From
 tot$from <- gsub(pattern = "00-t", replacement = "00", x = tot$from)
+tot$from[tot$number=="3367"] <- 1000
+tot$from[tot$number=="3369"] <- 1100
+tot$from[tot$number=="3725"] <- 1466
+tot$from[tot$number=="3734"] <- 1260
+tot$from[tot$number=="3930"] <- 1169
 tot$from[tot$from=="(14)77"] <- "1477"
 tot$from[tot$from=="1058-85"] <- 1058
 tot$from[tot$from=="1178-1191"] <- 1178
@@ -107,6 +112,11 @@ tot$from <- as.numeric(tot$from)
 
 ## To
 tot$to <- gsub(pattern = "00-t", replacement = "99", x = tot$to)
+tot$to[tot$number=="3367"] <- 1099
+tot$to[tot$number=="3369"] <- 1199
+tot$to[tot$number=="3725"] <- 1503
+tot$to[tot$number=="3734"] <- 1260
+tot$to[tot$number=="3930"] <- 1200
 tot$to[tot$to=="(14)77"] <- "1477"
 tot$to[tot$to=="1058-85"] <- 1085
 tot$to[tot$to=="1178-1191"] <- 1191
@@ -156,6 +166,11 @@ tot$to <- as.numeric(tot$to)
 
 ## Sorting out year
 tot$year <- gsub(pattern = "00-t", replacement = "50", x = tot$year)
+tot$year[tot$number=="3367"] <- round((1099+1000)/2)
+tot$year[tot$number=="3369"] <- round((1199+1100)/2)
+tot$year[tot$number=="3725"] <- round((1503+1466)/2)
+tot$year[tot$number=="3734"] <- 1260
+tot$year[tot$number=="3930"] <- round((1200+1169)/2)
 tot$year[tot$year=="(14)77"] <- "1477"
 tot$year[tot$year=="1058-85"] <- round((1058+1085)/2)
 tot$year[tot$year=="1178-1191"] <- round((1178+1191)/2)
@@ -210,6 +225,8 @@ table(tot$vern, useNA = "ifany")
 
 ## Females only
 ftot <- tot[tot$female==1,]
+## Removed after individual inspection
+ftot <- ftot[!ftot$number%in%c("5353b","22024","7513","3744","21213","7510","7512","21066","22209","20652","7514","20650","7511","3731","453","922","3961","12595","21755"),]
 ## Adding decade?
 ftot$decade <- cut(x = ftot$year, breaks = seq(from = 800,to = 1700,by = 10))
 ## All women
@@ -231,13 +248,16 @@ se <- sqrt(p*(1-p)/N);se
 round(100*(p+1.96*c(-1,0,1)*se),1)
 
 ## Number of named manuscripts
-sum(s2$colos==1)
+sum((s2$colos==1)&(!s2$number%in%c("5353b","22024","7513","3744","21213","7510","7512","21066","22209","20652","7514","20650","7511","3731","453","922","3961","12595","21755")))
 ## Number of anonymous manuscripts
-sum(s1$female==1)+sum(s3$female==1)
+sum((s1$female==1)&(!s1$number%in%c("5353b","22024","7513","3744","21213","7510","7512","21066","22209","20652","7514","20650","7511","3731","453","922","3961","12595","21755"))) + 
+  sum((s3$female==1)&(!s3$number%in%c("5353b","22024","7513","3744","21213","7510","7512","21066","22209","20652","7514","20650","7511","3731","453","922","3961","12595","21755")))
 
 ## Number of names
 ## Some names appear more than once
 name <- read.csv2(file = "Kolofoner_sheet2.csv", stringsAsFactors = F, header = T)[,c("Name","Scribes.","Year","LAT","VERN","Number")];dim(name)
+## Manually removed
+name <- name[!name$Number%in%c("5353b","22024","7513","3744","21213","7510","7512","21066","22209","20652","7514","20650","7511","3731","453","922","3961","12595","21755"),]
 name <- name[!name[,"Number"]%in%c("no","no no."),];dim(name)
 name <- name[order(name$Scribes.,decreasing = T),];head(name);dim(name)
 n.list <- strsplit(x = name$Name, split = ", ");length(n.list)
@@ -252,14 +272,15 @@ for(i in 1:nrow(name)){
     }
   }
 }
-name2 <- name2[order(name2[,1],name2[,3],name2[,4],name2[,5]),];head(name2,20)
-name2scribes <- name2[name2[,"Scribes."]!="0"|is.na(name2[,"Scribes."]!="0"),]
+name2 <- name2[order(name2[,1],name2[,3],name2[,4],name2[,5]),];head(name2,20);dim(name2)
+name2scribes <- name2[name2[,"Scribes."]!="0"|is.na(name2[,"Scribes."]!="0"),];dim(name2scribes)
 
 ## Table with all females
 tab.out <- with(data = ftot[ftot$colos==1,],data.frame(number,from,to,name,text));head(tab.out);dim(tab.out)
 tab.out <- tab.out[order(tab.out$from),];head(tab.out);dim(tab.out)
 tab.out$number <- gsub(pattern = "[ (?)]*",replacement = "",x = tab.out$number);tab.out$number
 names(tab.out) <- c("Colophone number","From","To","Name(s) of scribe(s)","Colophone text")
+head(tab.out)
 
 ## Fig 3
 ftot <- ftot[order(ftot$from),]
